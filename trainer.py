@@ -55,8 +55,8 @@ class Trainer:
 				optim_c.lr = lr
 				optim_d.lr = lr
 			
-			data = data.to(device)
-			labels = labels.to(device)
+			data = data.to(self.device)
+			labels = labels.to(self.device)
 			optim_f.zero_grad()
 			optim_c.zero_grad()
 			optim_d.zero_grad()
@@ -73,7 +73,7 @@ class Trainer:
 			if train_domain:
 				data_snd, _ = domain_iter.next()
 				domainData, domains = self.concat_domain_batches([data.to('cpu'), data_snd.to('cpu')])
-				domainData, domains = domainData.to(device), domains.to(device)
+				domainData, domains = domainData.to(self.device), domains.to(self.device)
 				optim_f.zero_grad()
 				optim_c.zero_grad()
 				optim_d.zero_grad()
@@ -124,9 +124,9 @@ class Trainer:
 													target_test_loader, no_print=True)
 			
 			for data, target in merged_test_loader:
-				data = data.to(device)
+				data = data.to(self.device)
 				_, domains = target
-				domains = domains.to(device)
+				domains = domains.to(self.device)
 				
 				domain_out = domain_model(data)
 				domain_pred = domain_out.max(1, keepdim=True)[1] 
