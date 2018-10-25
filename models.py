@@ -67,10 +67,10 @@ def extendFeatureExtractor(outputSize, inputSize=320):
 	return nn.Sequential(MnistFeatureExtractor(), nn.Linear(inputSize, outputSize))
 
 class ZeroHalf(nn.Module):
-	def __init__(self, inputSize=320, half=0, useGR=True):
+	def __init__(self, inputSize=320, useGR=True):
 		super(ZeroHalf, self).__init__()
 		self.tensor = torch.ones(inputSize).double()
-		self.tensor[half*inputSize/2:(half+1)*inputSize/2] = 0
+		self.tensor[half*inputSize//2:(half+1)*inputSize//2] = 0
 		self.zeroInput = 0
 
 	def forward(self, x, lambd=1.):
