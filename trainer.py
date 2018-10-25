@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from collections import defaultdict, namedtuple
-import test
+import test_model
 
 class Trainer:
 
@@ -37,9 +37,9 @@ class Trainer:
 		model_c = self.models.model_c.train()
 		model_d = self.models.model_d.train()
 
-		optim_f = self.optims.optim_f.train()
-		optim_c = self.optims.optim_c.train()
-		optim_d = self.optims.optim_d.train()
+		optim_f = self.optims.optim_f
+		optim_c = self.optims.optim_c
+		optim_d = self.optims.optim_d
 		
 		train_loader = loaders.train_loader
 		criterion = self.criterions.criterion
@@ -68,14 +68,14 @@ class Trainer:
 			output = model_c(model_f(data))
 			loss = criterion(output, labels)
 			if self.extra_loss is not None:
-				loss += extra_loss(model_f, model_c, model_d, output, labels)
+				loss += self.extra_loss(model_f, model_c, model_d, output, labels)
 			train_history['train_loss'].append(loss.item())
 			loss.backward()
 			
 			optim_f.step()
 			optim_c.step()
 			optim_d.step()
-			if train_domain:
+			if self.train_domain:
 				data_snd, _ = domain_iter.next()
 				domainData, domains = self.concat_domain_batches([data.to('cpu'), data_snd.to('cpu')])
 				domainData, domains = domainData.to(self.device), domains.to(self.device)
@@ -91,7 +91,7 @@ class Trainer:
 				output = model_d(model_f(domainData), lambd)
 				loss_domain = criterion_domain(output, domains)
 				if self.extra_loss is not None:
-					loss_domain += extra_loss(model_f, model_c, model_d, output, labels)
+					loss_domain += self.extra_loss(model_f, model_c, model_d, output, labels)
 				train_history['domain_loss'].append(loss_domain)
 				
 				loss_domain.backward()
@@ -110,7 +110,7 @@ class Trainer:
 					.format(epoch, batch_idx * len(data), len(train_loader.dataset),
 					100. * batch_idx / len(train_loader), loss.item(), p, lambd))
 
-	def _test_domain_model(loaders, test_history=defaultdict(lambda:[])):
+	def _test_domain_model(self, loaders, test_history=defaultdict(lambda:[])):
 		model_f = self.models.model_f.eval()
 		model_c = self.models.model_c.eval()
 		model_d = self.models.model_d.eval()
@@ -155,8 +155,13 @@ class Trainer:
 			domain_correct, len(merged_test_loader.dataset),
 			100. * domain_correct / len(merged_test_loader.dataset)))
 	
-	def train(self, epochs, loaders, test_history = defaultdict(lambda:[]), train_history = defaultdict(lambda:[])):
+	def train(self, epochs, loaders, extra_loss=None, train_history = None, test_history=None):
 		self.epochs = epochs
+		self.extra_loss = extra_loss
+		if train_history is None:
+			train_history = defaultdict(lambda:[])
+		if test_history is None:
+			test_history = defaultdict(lambda:[])
 		for epoch in range(1, self.epochs+1):
 			self._train_with_domain(loaders, epoch, train_history)
 			self._test_domain_model(loaders, test_history)
