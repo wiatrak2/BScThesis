@@ -123,9 +123,9 @@ class Trainer:
 		with torch.no_grad():
 			class_model = nn.Sequential(model_f, model_c)
 			domain_model = nn.Sequential(model_f, model_d)
-			source_test_loss, source_correct = test_model.test_model(class_model, device,
+			source_test_loss, source_correct = test_model.test_model(class_model, self.device,
 													self.criterions, source_test_loader, no_print=True)
-			target_test_loss, target_correct = test_model.test_model(class_model, device,
+			target_test_loss, target_correct = test_model.test_model(class_model, self.device,
 													self.criterions, target_test_loader, no_print=True)
 			
 			for data, target in merged_test_loader:
