@@ -36,6 +36,11 @@ class Trainer:
 		model_f = self.models.model_f.train()
 		model_c = self.models.model_c.train()
 		model_d = self.models.model_d.train()
+
+		optim_f = self.optims.optim_f.train()
+		optim_c = self.optims.optim_c.train()
+		optim_d = self.optims.optim_d.train()
+		
 		train_loader = loaders.train_loader
 		criterion = self.criterions.criterion
 
