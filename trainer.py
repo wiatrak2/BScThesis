@@ -48,7 +48,7 @@ class Trainer:
 
 		for batch_idx, (data, labels) in enumerate(train_loader):
 			
-			p = ((epoch-1) * batch_num + batch_idx) / (epochs * batch_num)
+			p = ((epoch-1) * batch_num + batch_idx) / (self.epochs * batch_num)
 			if self.tune_lr:
 				lr = 0.01 / (1. + 10. * p)**0.75
 				optim_f.lr = lr
