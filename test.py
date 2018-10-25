@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
-def test(model, device, test_loader, no_print=False):
+def test_model(model, device, test_loader, no_print=False):
 	model.eval()
 	test_loss = 0
 	correct = 0

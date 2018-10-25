@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from collections import defaultdict, namedtuple
-from test import test
+from test import test_model
 
 class Trainer:
 
