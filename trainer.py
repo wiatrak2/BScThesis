@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-from collections import namedtuple
+from collections import defaultdict, namedtuple
 from test import test
 
 class Trainer:
@@ -111,8 +111,7 @@ class Trainer:
 		model_d = self.models.model_d.eval()
 		source_test_loader = loaders.source_test_loader
 		target_test_loader = loaders.target_test_loader
-        merged_test_loader = loaders.merged_test_loader
-
+		merged_test_loader = loaders.merged_test_loader
 		domain_test_loss = 0
 		domain_correct = 0
 		
@@ -125,13 +124,13 @@ class Trainer:
 													target_test_loader, no_print=True)
 			
 			for data, target in merged_test_loader:
-			data = data.to(device)
-			_, domains = target
-			domains = domains.to(device)
-			
-			domain_out = domain_model(data)
-			domain_pred = domain_out.max(1, keepdim=True)[1] 
-			domain_correct += domain_pred.eq(domains.view_as(domain_pred)).sum().item()
+				data = data.to(device)
+				_, domains = target
+				domains = domains.to(device)
+				
+				domain_out = domain_model(data)
+				domain_pred = domain_out.max(1, keepdim=True)[1] 
+				domain_correct += domain_pred.eq(domains.view_as(domain_pred)).sum().item()
 			
 		domain_test_loss /= len(merged_test_loader.dataset)
 		
