@@ -153,5 +153,5 @@ class Trainer:
 	def train(self, epochs, loaders, test_history = defaultdict(lambda:[]), train_history = defaultdict(lambda:[])):
 		self.epochs = epochs
 		for epoch in range(1, self.epochs+1):
-			_train_with_domain(loaders, epoch, train_history)
-			_test_domain_model(loaders, test_history)
+			self._train_with_domain(loaders, epoch, train_history)
+			self._test_domain_model(loaders, test_history)
