@@ -32,7 +32,7 @@ class Trainer:
 			batches, domain_labels = batches[idx], domain_labels[idx].astype(np.long)
 		return torch.from_numpy(batches), torch.from_numpy(domain_labels)
 
-	def _train_with_domain(self, loaders, epoch, train_history=defaultdict(lambda:[])):
+	def _train_with_domain(self, loaders, epoch, train_history):
 		model_f = self.models.model_f.train()
 		model_c = self.models.model_c.train()
 		model_d = self.models.model_d.train()
@@ -110,7 +110,7 @@ class Trainer:
 					.format(epoch, batch_idx * len(data), len(train_loader.dataset),
 					100. * batch_idx / len(train_loader), loss.item(), p, lambd))
 
-	def _test_domain_model(self, loaders, test_history=defaultdict(lambda:[])):
+	def _test_domain_model(self, loaders, test_history):
 		model_f = self.models.model_f.eval()
 		model_c = self.models.model_c.eval()
 		model_d = self.models.model_d.eval()
@@ -155,7 +155,7 @@ class Trainer:
 			domain_correct, len(merged_test_loader.dataset),
 			100. * domain_correct / len(merged_test_loader.dataset)))
 	
-	def train(self, epochs, loaders, extra_loss=None, train_history = None, test_history=None):
+	def train(self, epochs, loaders, extra_loss=None, train_history=None, test_history=None):
 		self.epochs = epochs
 		self.extra_loss = extra_loss
 		if train_history is None:
