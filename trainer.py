@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from collections import defaultdict, namedtuple
-from test import test_model
+import test
 
 class Trainer:
 
@@ -118,9 +118,9 @@ class Trainer:
 		with torch.no_grad():
 			class_model = nn.Sequential(model_f, model_c)
 			domain_model = nn.Sequential(model_f, model_d)
-			source_test_loss, source_correct = test_model(class_model, device,
+			source_test_loss, source_correct = test.test_model(class_model, device,
 													source_test_loader, no_print=True)
-			target_test_loss, target_correct = test_model(class_model, device,
+			target_test_loss, target_correct = test.test_model(class_model, device,
 													target_test_loader, no_print=True)
 			
 			for data, target in merged_test_loader:
