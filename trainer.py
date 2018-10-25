@@ -63,7 +63,7 @@ class Trainer:
 			output = model_c(model_f(data))
 			loss = criterion(output, labels)
 			if self.extra_loss is not None:
-			loss += extra_loss(model_f, model_c, model_d, output, labels)
+				loss += extra_loss(model_f, model_c, model_d, output, labels)
 			train_history['train_loss'].append(loss.item())
 			loss.backward()
 			
