@@ -150,7 +150,7 @@ class Trainer:
 			domain_correct, len(merged_test_loader.dataset),
 			100. * domain_correct / len(merged_test_loader.dataset)))
 	
-	def train(epochs, loaders, test_history = defaultdict(lambda:[]), train_history = defaultdict(lambda:[])):
+	def train(self, epochs, loaders, test_history = defaultdict(lambda:[]), train_history = defaultdict(lambda:[])):
 		self.epochs = epochs
 		for epoch in range(1, self.epochs+1):
 			_train_with_domain(loaders, epoch, train_history)
