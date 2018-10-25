@@ -4,10 +4,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
-def test_model(model, device, test_loader, no_print=False):
+def test_model(model, device, criterions, test_loader, no_print=False):
 	model.eval()
 	test_loss = 0
 	correct = 0
+	criterion = criterions.criterion
 	with torch.no_grad():
 		for data, target in test_loader:
 			data, target = data.to(device), target.to(device)
