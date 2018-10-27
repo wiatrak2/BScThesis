@@ -158,7 +158,7 @@ class Trainer:
 		print('\nDomains predictor:  Accuracy: {}/{} ({:.0f}%)\n'.format(
 			domain_correct, len(merged_test_loader.dataset),
 			100. * domain_correct / len(merged_test_loader.dataset)))
-	return 100. * target_correct / len(target_test_loader.dataset)
+		return 100. * target_correct / len(target_test_loader.dataset)
 	
 	def train(self, epochs, loaders, extra_loss=None, test_history=None):
 		self.epochs = epochs
