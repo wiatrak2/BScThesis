@@ -96,7 +96,7 @@ class Trainer:
 				loss_domain = criterion_domain(output, domains)
 				if self.extra_loss is not None:
 					loss_domain += self.extra_loss(model_f, model_c, model_d, output, labels)
-				self.train_history['domain_loss'].append(loss_domain)
+				self.train_history['domain_loss'].append(loss_domain.item())
 				
 				loss_domain.backward()
 				optim_f.step()
