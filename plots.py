@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def plotTest(test_history):
+def plot_test(test_history):
   fig, axs = plt.subplots(2, 2, figsize=(21,10))
 
   fig.suptitle('Test History')
@@ -32,7 +32,7 @@ def plotTest(test_history):
   axs[1][1].set_xlabel('epoch')
   axs[1][1].legend(frameon=True, facecolor='white')
 
-def plotTraining(train_history):
+def plot_training(train_history):
   fig, axs = plt.subplots(2, 2, figsize=(21,10))
   fig.suptitle('Train History')
 
@@ -67,7 +67,7 @@ def plotTraining(train_history):
   axs[1][1].set_xlabel('batch')
   axs[1][1].legend(frameon=True, facecolor='white')
 
-def plotDomainTraining(domain_train_history, train_history):
+def plot_domain_training(domain_train_history, train_history):
   fig, axs = plt.subplots(1, 3, figsize=(21,5))
 
   fig.suptitle('Train History')

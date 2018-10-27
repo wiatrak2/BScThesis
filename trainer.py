@@ -4,6 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from collections import defaultdict, namedtuple
+from copy import deepcopy
 import test_model
 
 class Trainer:
@@ -15,8 +16,11 @@ class Trainer:
 		self.device = device
 		self.use_lambd = kwargs.get('use_lambd', True)
 		self.tune_lr = kwargs.get('tune_lr', False)
+		self.train_history = kwargs.get('train_history', defaultdict(lambda:[]))
 		self.train_domain = kwargs.get('train_domain', True)
 		self.log_interval = kwargs.get('log_interval', 100)
+		self.best_accuracy = 0.0
+		self.best_model = None
 
 	@staticmethod
 	def concat_domain_batches(batches, shuffle=True):
@@ -32,7 +36,7 @@ class Trainer:
 			batches, domain_labels = batches[idx], domain_labels[idx].astype(np.long)
 		return torch.from_numpy(batches), torch.from_numpy(domain_labels)
 
-	def _train_with_domain(self, loaders, epoch, train_history):
+	def _train_with_domain(self, loaders, epoch):
 		model_f = self.models.model_f.train()
 		model_c = self.models.model_c.train()
 		model_d = self.models.model_d.train()
@@ -69,7 +73,7 @@ class Trainer:
 			loss = criterion(output, labels)
 			if self.extra_loss is not None:
 				loss += self.extra_loss(model_f, model_c, model_d, output, labels)
-			train_history['train_loss'].append(loss.item())
+			self.train_history['train_loss'].append(loss.item())
 			loss.backward()
 			
 			optim_f.step()
@@ -92,7 +96,7 @@ class Trainer:
 				loss_domain = criterion_domain(output, domains)
 				if self.extra_loss is not None:
 					loss_domain += self.extra_loss(model_f, model_c, model_d, output, labels)
-				train_history['domain_loss'].append(loss_domain)
+				self.train_history['domain_loss'].append(loss_domain)
 				
 				loss_domain.backward()
 				optim_f.step()
@@ -101,9 +105,9 @@ class Trainer:
 				
 				model_d_mtx = model_d.fc1.weight.cpu().detach().numpy()
 				model_c_mtx = model_c.fc1.weight.cpu().detach().numpy()
-				train_history['avg_len_c'].append(np.mean(np.diag(model_c_mtx.dot(model_c_mtx.T))))
-				train_history['avg_len_d'].append(np.mean(np.diag(model_d_mtx.dot(model_d_mtx.T))))
-				train_history['avg_dot'].append(np.mean(model_c_mtx.dot(model_d_mtx.T)))  
+				self.train_history['avg_len_c'].append(np.mean(np.diag(model_c_mtx.dot(model_c_mtx.T))))
+				self.train_history['avg_len_d'].append(np.mean(np.diag(model_d_mtx.dot(model_d_mtx.T))))
+				self.train_history['avg_dot'].append(np.mean(model_c_mtx.dot(model_d_mtx.T)))  
 			if batch_idx % self.log_interval == 0:
 				print('Train Epoch: \
 					{} [{}/{} ({:.0f}%)]\tLoss: {:.6f}, p: {:.5f} lambd: {:.5f}'
@@ -154,14 +158,19 @@ class Trainer:
 		print('\nDomains predictor:  Accuracy: {}/{} ({:.0f}%)\n'.format(
 			domain_correct, len(merged_test_loader.dataset),
 			100. * domain_correct / len(merged_test_loader.dataset)))
+	return 100. * target_correct / len(target_test_loader.dataset)
 	
-	def train(self, epochs, loaders, extra_loss=None, train_history=None, test_history=None):
+	def train(self, epochs, loaders, extra_loss=None, test_history=None):
 		self.epochs = epochs
 		self.extra_loss = extra_loss
-		if train_history is None:
-			train_history = defaultdict(lambda:[])
 		if test_history is None:
 			test_history = defaultdict(lambda:[])
 		for epoch in range(1, self.epochs+1):
-			self._train_with_domain(loaders, epoch, train_history)
-			self._test_domain_model(loaders, test_history)
+			self._train_with_domain(loaders, epoch)
+			acc = self._test_domain_model(loaders, test_history)
+			if acc > self.best_accuracy:
+				self.best_model = deepcopy(self.models)
+				self.best_accuracy = acc
+	
+	def get_best_model(self):
+		return self.best_model, self.best_accuracy
