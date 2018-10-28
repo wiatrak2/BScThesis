@@ -103,8 +103,8 @@ class Trainer:
 				optim_c.step()
 				optim_d.step()
 				
-				model_d_mtx = model_d.fc1.weight.cpu().detach().numpy()
-				model_c_mtx = model_c.fc1.weight.cpu().detach().numpy()
+				model_d_mtx = model_d.get_mtx().weight.cpu().detach().numpy()
+				model_c_mtx = model_c.get_mtx().weight.cpu().detach().numpy()
 				self.train_history['avg_len_c'].append(np.mean(np.diag(model_c_mtx.dot(model_c_mtx.T))))
 				self.train_history['avg_len_d'].append(np.mean(np.diag(model_d_mtx.dot(model_d_mtx.T))))
 				self.train_history['avg_dot'].append(np.mean(model_c_mtx.dot(model_d_mtx.T)))  
