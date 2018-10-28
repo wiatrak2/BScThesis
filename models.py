@@ -106,6 +106,6 @@ def get_models(model_f_linear, model_c_linear, model_d_linear, use_gr=False, mod
 	if not model_f_dropout:
 		model_f = nn.Sequential(model_f, nn.Linear(model_f_linear[-1], model_f_linear[-1]))
 	model_c = nn.Sequential(LinearFromList(model_c_linear), nn.Linear(model_c_linear[-1], 10), nn.LogSoftmax(dim=1))
-	model_c.get_mtx = lambda: torch.tensor(next(model_c.parameters()))
+	model_c.get_mtx = lambda: model_c[0].linears[0]
 	model_d = LinearFromList(model_d_linear[:-1], use_gr, output_model=DomainPredictor(model_d_linear[-2], model_d_linear[-1]))
 	return model_f, model_c, model_d
