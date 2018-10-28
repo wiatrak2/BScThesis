@@ -15,6 +15,7 @@ class Trainer:
 		self.criterions = criterions
 		self.device = device
 		self.use_lambd = kwargs.get('use_lambd', True)
+		self.default_lambd = kwargs.get('default_lambd', 1.0)
 		self.tune_lr = kwargs.get('tune_lr', False)
 		self.train_history = kwargs.get('train_history', defaultdict(lambda:[]))
 		self.train_domain = kwargs.get('train_domain', True)
@@ -52,7 +53,6 @@ class Trainer:
 			domain_iter = iter(loaders.train_loader_domain)
 			criterion_domain = self.criterions.criterion_domain
 
-		lambd = -1.
 		batch_num = len(train_loader.dataset) / train_loader.batch_size
 
 		for batch_idx, (data, labels) in enumerate(train_loader):
@@ -90,7 +90,7 @@ class Trainer:
 				if self.use_lambd:
 					lambd = 2. / (1. + np.exp(-10. * p)) - 1.   
 				else:
-					lambd = 1.
+					lambd = self.default_lambd
 
 				output = model_d(model_f(domainData), lambd)
 				loss_domain = criterion_domain(output, domains)
@@ -110,9 +110,9 @@ class Trainer:
 				self.train_history['avg_dot'].append(np.mean(model_c_mtx.dot(model_d_mtx.T)))  
 			if batch_idx % self.log_interval == 0:
 				print('Train Epoch: \
-					{} [{}/{} ({:.0f}%)]\tLoss: {:.6f}, p: {:.5f} lambd: {:.5f}'
+					{} [{}/{} ({:.0f}%)]\tLoss: {:.6f}, lr: {:.5f} lambd: {:.5f}'
 					.format(epoch, batch_idx * len(data), len(train_loader.dataset),
-					100. * batch_idx / len(train_loader), loss.item(), p, lambd))
+					100. * batch_idx / len(train_loader), loss.item(), lr if self.tune_lr else 0., lambd))
 
 	def _test_domain_model(self, loaders, test_history):
 		model_f = self.models.model_f.eval()

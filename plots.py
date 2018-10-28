@@ -83,7 +83,7 @@ def plot_domain_training(domain_train_history, train_history):
                  label='Gradient Reverse Net')
   axs[0].set_title('Avg len of vector')
   axs[0].set_ylabel('len')
-  axs[0].set_xlabel('epoch')
+  axs[0].set_xlabel('batch')
   axs[0].legend(frameon=True, facecolor='white')
 
   axs[1].plot(np.arange(histLen), domain_train_history['avg_dot'][:histLen],
@@ -92,14 +92,14 @@ def plot_domain_training(domain_train_history, train_history):
                  label='Gradient Reverse Net')
   axs[1].set_title('Average of dot product with class net')
   axs[1].set_ylabel('dot product')
-  axs[1].set_xlabel('epoch')
+  axs[1].set_xlabel('batch')
   axs[1].legend(frameon=True, facecolor='white')
 
   axs[2].plot(np.arange(len(domain_train_history['avg_dot_gr'])),
               domain_train_history['avg_dot_gr'], label='Avg dot product')
   axs[2].set_title('Average of dot product with domain GR net')
   axs[2].set_ylabel('dot product')
-  axs[2].set_xlabel('epoch')
+  axs[2].set_xlabel('batch')
   axs[2].legend(frameon=True, facecolor='white')
 
 

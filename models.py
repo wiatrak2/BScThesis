@@ -28,10 +28,10 @@ class MnistFeatureExtractor(nn.Module):
     return x.view(-1, 320)
 
 class MnistClassPredictor(nn.Module):
-  def __init__(self, inputSize=320):
+  def __init__(self, input_size=320, inner_size=50):
     super(MnistClassPredictor, self).__init__()
-    self.fc1 = nn.Linear(inputSize, 50)
-    self.fc2 = nn.Linear(50, 10)
+    self.fc1 = nn.Linear(input_size, inner_size)
+    self.fc2 = nn.Linear(inner_size, 10)
   def forward(self, x):
     x = F.leaky_relu(self.fc1(x))
     x = F.dropout(x, training=self.training)
@@ -39,10 +39,10 @@ class MnistClassPredictor(nn.Module):
     return F.log_softmax(x, dim=1)
 
 class MnistDomain(nn.Module):
-  def __init__(self, inputSize=320):
+  def __init__(self, input_size=320, inner_size=100):
     super(MnistDomain, self).__init__()
-    self.fc1 = nn.Linear(inputSize, 100)
-    self.fc2 = nn.Linear(100, 2)
+    self.fc1 = nn.Linear(input_size, inner_size)
+    self.fc2 = nn.Linear(inner_size, 2)
 
   def forward(self, x, lambd=1.):
     x = grad_reverse(x, lambd)
@@ -52,10 +52,10 @@ class MnistDomain(nn.Module):
     return F.log_softmax(x, dim=1)
 
 class DomainPredictor(nn.Module):
-  def __init__(self, inputSize=320):
+  def __init__(self, input_size=320, inner_size=100):
     super(DomainPredictor, self).__init__()
-    self.fc1 = nn.Linear(inputSize, 100)
-    self.fc2 = nn.Linear(100, 2)
+    self.fc1 = nn.Linear(input_size, inner_size)
+    self.fc2 = nn.Linear(inner_size, 2)
 
   def forward(self, x, *args):
     x = F.leaky_relu(self.fc1(x))
@@ -63,20 +63,27 @@ class DomainPredictor(nn.Module):
     x = self.fc2(x)
     return F.log_softmax(x, dim=1)
 
-def extendFeatureExtractor(outputSize, inputSize=320):
-	return nn.Sequential(MnistFeatureExtractor(), nn.Linear(inputSize, outputSize))
-
-class ZeroHalf(nn.Module):
-	def __init__(self, inputSize=320, useGR=True):
-		super(ZeroHalf, self).__init__()
-		self.tensor = torch.ones(inputSize).double()
-		self.tensor[half*inputSize//2:(half+1)*inputSize//2] = 0
-		self.zeroInput = 0
+class LinearFromList(nn.Module):
+	def __init__(self, size_list, use_gr=False):
+		super(LinearFromList, self).__init__()
+		self.linears = nn.ModuleList([nn.Linear(size_list[i], size_list[i+1]) for i in range(len(size_list)-1)])
+		self.use_gr = use_gr
 
 	def forward(self, x, lambd=1.):
-		if self.zeroInput:
-			x = x * self.tensor
+		if self.use_gr:
 			x = grad_reverse(x, lambd)
-		self.zeroInput = 1 - self.zeroInput
-		return x.view_as(x)
-	
+		for layer in self.linears:
+			x = F.leaky_relu(layer(x))
+			x = F.dropout(x, training=self.training)
+		return x
+
+def extend_feature_extractor(output_size, input_size=320):
+	return nn.Sequential(MnistFeatureExtractor(), nn.Linear(input_size, output_size))
+
+def get_models(model_f_linear, model_c_linear, model_d_linear, use_gr=False, model_f_dropout=False):
+	model_f = nn.Sequential(MnistFeatureExtractor(), LinearFromList(model_f_linear))
+	if not model_f_dropout:
+		model_f = nn.Sequential(model_f, nn.Linear(model_f_linear[-1], model_f_linear[-1]))
+	model_c = nn.Sequential(LinearFromList(model_c_linear), nn.Linear(model_c_linear[-1], 10), nn.LogSoftmax(dim=1))
+	model_d = nn.Sequential(LinearFromList(model_d_linear, use_gr), nn.Linear(model_d_linear[-1], 2), nn.LogSoftmax(dim=1))
+	return model_f, model_c, model_d
