@@ -86,7 +86,7 @@ class LinearFromList(nn.Module):
 		self.use_gr = use_gr
 
 	def get_mtx(self):
-		return self.linears[0]
+		return self.linears[0] if len(self.linears) > 0 else self.output_model.get_mtx()
 
 	def forward(self, x, lambd=1.):
 		if self.use_gr:
