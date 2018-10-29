@@ -1,6 +1,7 @@
 import plotly
 from plotly import tools
 from plotly.offline import init_notebook_mode, iplot
+import plotly.graph_objs as go
 import numpy as np
 
 def configure_plotly_browser_state():
