@@ -36,7 +36,6 @@ def plot_training(train_history):
   fig, axs = plt.subplots(2, 2, figsize=(21,10))
   fig.suptitle('Train History')
 
-
   axs[0][0].plot(np.arange(len(train_history['train_loss'])), 
               train_history['train_loss'], label='Batch train loss')
   axs[0][0].set_title('Train loss over batches')

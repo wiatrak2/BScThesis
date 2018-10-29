@@ -78,6 +78,25 @@ class DomainPredictor(nn.Module):
 		x = self.fc2(x)
 		return F.log_softmax(x, dim=1)
 
+class ZeroHalf(nn.Module):
+	def __init__(self, device, output_model, tensor_size, half=0):
+		super(ZeroHalf, self).__init__()
+		self.tensor = torch.ones(tensor_size).to(device)
+		if half == 0:
+			self.tensor[:tensor_size//2] = 0
+		else:
+			self.tensor[tensor_size//2:] = 0
+		self.output_model = output_model
+		
+	def get_mtx(self):
+		return self.output_model.get_mtx()
+	
+	def forward(self, x, *args):
+		x *= self.tensor
+		if args:
+			return self.output_model(x, args)
+		return self.output_model(x)
+
 class LinearFromList(nn.Module):
 	def __init__(self, size_list, use_gr=False, output_model=None):
 		super(LinearFromList, self).__init__()
