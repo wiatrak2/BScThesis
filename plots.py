@@ -104,7 +104,7 @@ def plot_domain_training(domain_train_history, train_history):
 
 def plot_multimodel_stats(trainers, test_histories):
   fig, axs = plt.subplots(2, 2, figsize=(21,10))
-  fig.suptitle('Train History')
+  fig.suptitle('Models Test History')
   for trainer_num, (single_trainer, test_history) in enumerate(list(zip(trainers, test_histories))): 
     train_history = single_trainer.train_history
 
