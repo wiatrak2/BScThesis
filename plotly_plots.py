@@ -49,10 +49,10 @@ def plot_multimodel_stats(trainers, test_histories):
 
 	fig = tools.make_subplots(rows=2, cols=2)
 	for (t_acc, t_loss, t_len, t_dot) in list(zip(trace_acc, trace_loss, trace_len, trace_dot)):
-	fig.append_trace(t_acc, 1, 1)
-	fig.append_trace(t_loss, 1, 2)
-	fig.append_trace(t_len, 2, 1)
-	fig.append_trace(t_dot, 2, 2)
+		fig.append_trace(t_acc, 1, 1)
+		fig.append_trace(t_loss, 1, 2)
+		fig.append_trace(t_len, 2, 1)
+		fig.append_trace(t_dot, 2, 2)
 
 	configure_plotly_browser_state()
 
