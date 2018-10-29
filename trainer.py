@@ -54,7 +54,8 @@ class Trainer:
 			criterion_domain = self.criterions.criterion_domain
 
 		batch_num = len(train_loader.dataset) / train_loader.batch_size
-
+		lambd = self.default_lambd
+		
 		for batch_idx, (data, labels) in enumerate(train_loader):
 			
 			p = ((epoch-1) * batch_num + batch_idx) / (self.epochs * batch_num)
