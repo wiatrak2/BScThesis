@@ -63,8 +63,7 @@ def plot_multimodel_stats(trainers, test_histories):
 	) for i in range(len(trainers))]
 
 	fig = tools.make_subplots(rows=3, cols=2)
-	for (t_acc, t_source, t_domain, t_loss, t_len, t_dot) in /
-	list(zip(trace_acc, trace_source_acc, trace_domain_acc, trace_loss, trace_len, trace_dot)):
+	for (t_acc, t_source, t_domain, t_loss, t_len, t_dot) in list(zip(trace_acc, trace_source_acc, trace_domain_acc, trace_loss, trace_len, trace_dot)):
 		fig.append_trace(t_acc, 1, 1)
 		fig.append_trace(t_source, 1, 2)
 		fig.append_trace(t_domain, 2, 1)
