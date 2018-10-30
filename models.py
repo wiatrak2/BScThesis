@@ -11,7 +11,7 @@ class GradReverse(torch.autograd.Function):
         return x.view_as(x)
 
     def backward(self, grad_output):
-        return (grad_output * -self.lambd)
+        return grad_output * -self.lambd
 
 def grad_reverse(x, lambd):
     return GradReverse(lambd)(x)
