@@ -121,15 +121,14 @@ class LinearFromList(nn.Module):
 			return self.output_model(x)
 		return x
 
-def extend_feature_extractor(model_f, model_continuation, return_size=True):
-	for param in model_f.parameters():
-		param.requires_grad = False
+def extend_feature_extractor(model_f, model_continuation, freeze_model=True, return_size=True):
+	if freeze_model:
+		for param in model_f.parameters():
+			param.requires_grad = False
 	new_model_f = nn.Sequential(model_f, model_continuation)
 	if return_size:
-		return new_model_f, model_continuation.get_mtx().in_features
+		return new_model_f, model_continuation.get_mtx().out_features
 	return new_model_f
-
-
 
 def get_models(model_f_linear, model_c_linear, model_d_linear, use_gr=False, model_f_dropout=False):
 	model_f = nn.Sequential(MnistFeatureExtractor(), LinearFromList(model_f_linear))
