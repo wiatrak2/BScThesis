@@ -47,7 +47,7 @@ class DomainTrainer:
 					100. * batch_idx / len(train_loader), loss.item()))
 		
 	@staticmethod
-	def test_domain_pred(model, device, merged_test_loader, print_logs=True):
+	def test_domain_pred(model, device, merged_test_loader, print_logs=True, test_history=None):
 		model.eval()
 				
 		domain_test_loss = 0
@@ -68,7 +68,9 @@ class DomainTrainer:
 			print('\nDomains predictor:  Accuracy: {}/{} ({:.0f}%)\n'.format(
 				domain_correct, len(merged_test_loader.dataset),
 				100. * domain_correct / len(merged_test_loader.dataset)))	
-					
+		if test_history is not None:
+			test_history['acc'].append(100. * domain_correct / len(merged_test_loader.dataset))	
+
 	def train(self, epochs, loaders, gr_models=None, train_history=None):
 		self.epochs = epochs
 		if train_history is None:
@@ -76,4 +78,4 @@ class DomainTrainer:
 		for epoch in range(1, self.epochs+1):
 			self._train_domain(loaders, gr_models, epoch, train_history)
 			domain_model = nn.Sequential(self.models.model_f, self.models.model_d)
-			self.test_domain_pred(domain_model, self.device, loaders.merged_test_loader, print_logs=self.print_logs)			
+			self.test_domain_pred(domain_model, self.device, loaders.merged_test_loader, print_logs=self.print_logs, test_history=train_history)			
