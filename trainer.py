@@ -20,6 +20,7 @@ class Trainer:
 		self.train_history = kwargs.get('train_history', defaultdict(lambda:[]))
 		self.train_domain = kwargs.get('train_domain', True)
 		self.log_interval = kwargs.get('log_interval', 100)
+		self.print_logs = kwargs.get('print_logs', True)
 		self.best_accuracy = 0.0
 		self.best_model = None
 
@@ -55,7 +56,7 @@ class Trainer:
 
 		batch_num = len(train_loader.dataset) / train_loader.batch_size
 		lambd = self.default_lambd
-		
+
 		for batch_idx, (data, labels) in enumerate(train_loader):
 			
 			p = ((epoch-1) * batch_num + batch_idx) / (self.epochs * batch_num)
@@ -109,7 +110,7 @@ class Trainer:
 				self.train_history['avg_len_c'].append(np.mean(np.diag(model_c_mtx.dot(model_c_mtx.T))))
 				self.train_history['avg_len_d'].append(np.mean(np.diag(model_d_mtx.dot(model_d_mtx.T))))
 				self.train_history['avg_dot'].append(np.mean(model_c_mtx.dot(model_d_mtx.T)))  
-			if batch_idx % self.log_interval == 0:
+			if batch_idx % self.log_interval == 0 and self.print_logs:
 				print('Train Epoch: \
 					{} [{}/{} ({:.0f}%)]\tLoss: {:.6f}, lr: {:.5f} lambd: {:.5f}'
 					.format(epoch, batch_idx * len(data), len(train_loader.dataset),
@@ -149,16 +150,16 @@ class Trainer:
 		test_history['target_acc'].append(100. * target_correct / len(target_test_loader.dataset))
 		test_history['source_acc'].append(100. * source_correct / len(source_test_loader.dataset))
 		test_history['domain_acc'].append(100. * domain_correct / len(merged_test_loader.dataset))
-		
-		print('\nTarget Domain Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)'.format(
-			target_test_loss, target_correct, len(target_test_loader.dataset),
-			100. * target_correct / len(target_test_loader.dataset)))
-		print('\nSource Domain Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)'.format(
-			source_test_loss, source_correct, len(source_test_loader.dataset),
-			100. * source_correct / len(source_test_loader.dataset)))
-		print('\nDomains predictor:  Accuracy: {}/{} ({:.0f}%)\n'.format(
-			domain_correct, len(merged_test_loader.dataset),
-			100. * domain_correct / len(merged_test_loader.dataset)))
+		if self.print_logs:
+			print('\nTarget Domain Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)'.format(
+				target_test_loss, target_correct, len(target_test_loader.dataset),
+				100. * target_correct / len(target_test_loader.dataset)))
+			print('Source Domain Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)'.format(
+				source_test_loss, source_correct, len(source_test_loader.dataset),
+				100. * source_correct / len(source_test_loader.dataset)))
+			print('Domains predictor:  Accuracy: {}/{} ({:.0f}%)\n'.format(
+				domain_correct, len(merged_test_loader.dataset),
+				100. * domain_correct / len(merged_test_loader.dataset)))
 		return 100. * target_correct / len(target_test_loader.dataset)
 	
 	def train(self, epochs, loaders, extra_loss=None, test_history=None):

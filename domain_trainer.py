@@ -13,7 +13,8 @@ class DomainTrainer:
 		self.criterions = criterions
 		self.device = device
 		self.history = kwargs.get('history', True)
-		self.log_interval = kwargs.get('log_interval', 200)
+		self.log_interval = kwargs.get('log_interval', 100)
+		self.print_logs = kwargs.get('print_logs', True)
 
 	def _train_domain(self, loaders, gr_models, epoch, train_history):
 		model_d = self.models.model_d.train()
@@ -40,7 +41,7 @@ class DomainTrainer:
 				train_history['avg_len'].append(np.mean(np.diag(model_d_mtx.dot(model_d_mtx.T))))
 				train_history['avg_dot'].append(np.mean(model_d_mtx.dot(model_c_mtx.T)))
 				train_history['avg_dot_gr'].append(np.mean(model_d_mtx.dot(model_gr_mtx.T)))
-			if batch_idx % self.log_interval == 0:
+			if batch_idx % self.log_interval == 0 and self.print_logs:
 				print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
 					epoch, batch_idx * len(data), len(train_loader.dataset),
 					100. * batch_idx / len(train_loader), loss.item()))
@@ -63,11 +64,11 @@ class DomainTrainer:
 				domain_correct += domain_pred.eq(domains.view_as(domain_pred)).sum().item()
 				
 		domain_test_loss /= len(merged_test_loader.dataset)
-
-		print('\nDomains predictor:  Accuracy: {}/{} ({:.0f}%)\n'.format(
-			domain_correct, len(merged_test_loader.dataset),
-			100. * domain_correct / len(merged_test_loader.dataset)))	
-				
+		if self.print_logs:
+			print('\nDomains predictor:  Accuracy: {}/{} ({:.0f}%)\n'.format(
+				domain_correct, len(merged_test_loader.dataset),
+				100. * domain_correct / len(merged_test_loader.dataset)))	
+					
 	def train(self, epochs, loaders, gr_models=None, train_history=None):
 		self.epochs = epochs
 		if train_history is None:
