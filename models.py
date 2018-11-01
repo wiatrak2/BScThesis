@@ -121,6 +121,18 @@ class LinearFromList(nn.Module):
 			return self.output_model(x)
 		return x
 
+class SequentialModel(nn.Sequential):
+	def __init__(self, *args):
+		super(SequentialModel, self).__init__(*args)
+	def get_mtx(self):
+		first_param = next(self.parameters())
+		first_param.weight = first_param
+		return first_param
+	def forward(self, input, *args):
+		for module in self._modules.values():
+			input = module(input, *args)
+		return input
+
 def extend_feature_extractor(model_f, model_continuation, freeze_model=True, return_size=True):
 	if freeze_model:
 		for param in model_f.parameters():
@@ -134,6 +146,7 @@ def get_models(model_f_linear, model_c_linear, model_d_linear, use_gr=False, mod
 	model_f = nn.Sequential(MnistFeatureExtractor(), LinearFromList(model_f_linear))
 	if not model_f_dropout:
 		model_f = nn.Sequential(model_f, nn.Linear(model_f_linear[-1], model_f_linear[-1]))
-	model_c = LinearFromList(model_c_linear, output_model=nn.Sequential(nn.Linear(model_c_linear[-1], 10), nn.LogSoftmax(dim=1)))
+	model_c = LinearFromList(model_c_linear, output_model=SequentialModel(nn.Linear(model_c_linear[-1], 10), nn.LogSoftmax(dim=1)))
+	model_c.output_model.get_mtx = lambda: model_c.output_model[0]
 	model_d = LinearFromList(model_d_linear[:-1], use_gr, output_model=DomainPredictor(model_d_linear[-2], model_d_linear[-1]))
 	return model_f, model_c, model_d
