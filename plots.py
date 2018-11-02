@@ -101,37 +101,59 @@ def plot_domain_training(domain_train_history, train_history):
   axs[2].set_xlabel('batch')
   axs[2].legend(frameon=True, facecolor='white')
 
-def plot_multimodel_stats(trainers, test_histories):
+def plot_domain_vanishing(trainers, test_histories, domain_histories, domain_gr_histories):
   fig, axs = plt.subplots(2, 2, figsize=(21,10))
-  fig.suptitle('Models Test History')
-  for trainer_num, (single_trainer, test_history) in enumerate(list(zip(trainers, test_histories))): 
-    train_history = single_trainer.train_history
+  fig.suptitle('Domain Vanishing Research')
 
-    epoch = np.arange(1,len(test_history['target_acc'])+1)
-    axs[0][0].plot(epoch, np.array(test_history['target_acc']), label='trainer {}'.format(trainer_num+1))
-    axs[0][0].set_title('accuracy for class prediction')
-    axs[0][0].set_ylabel('accuracy')
-    axs[0][0].set_xlabel('epoch')
-    axs[0][0].legend(frameon=True, facecolor='white')
-     
-    axs[0][1].plot(np.arange(len(train_history['train_loss'])), 
-                train_history['train_loss'], label='trainer {}'.format(trainer_num+1))
-    axs[0][1].set_title('Train loss over batches')
-    axs[0][1].set_ylabel('loss')
-    axs[0][1].set_xlabel('batch')
-    axs[0][1].legend(frameon=True, facecolor='white')
+  target_pred = [test_history['target_acc'] for test_history in test_histories]
+  source_pred = [test_history['source_acc'] for test_history in test_histories]
+  domain_model_c = [domain_history['acc'] for domain_history in domain_histories]
+  domain_model_f = [domain_history['acc'] for domain_history in domain_gr_histories]
+  
+  target_pred_lens = np.array([len(pred) for pred in target_pred])
+  ends = np.cumsum(target_pred_lens)
+  begins = ends - target_pred_lens
+  epochY = [np.arange(begins[i], ends[i]) + 1 for i in range(len(ends))]
+  
+  for i, pred in enumerate(target_pred):
+	  axs[0][0].plot(epochY[i], pred, label='model {}'.format(i))
+	  axs[0][0].set_title('Target Domain Prediction')
+	  axs[0][0].set_ylabel('accuracy')
+	  axs[0][0].set_xlabel('epoch')
+	  axs[0][0].legend(frameon=True, facecolor='white')
 
-    vec_len_sum = np.array(train_history['avg_len_c']) + np.array(train_history['avg_len_d'])
-    axs[1][0].plot(np.arange(len(train_history['avg_len_c'])), vec_len_sum,
-                   label='trainer {}'.format(trainer_num+1))
-    axs[1][0].set_title('Avg len of vectors')
-    axs[1][0].set_ylabel('len of vector')
-    axs[1][0].set_xlabel('batch')
-    axs[1][0].legend(frameon=True, facecolor='white')
+  target_pred_lens = np.array([len(pred) for pred in source_pred])
+  ends = np.cumsum(target_pred_lens)
+  begins = ends - target_pred_lens
+  epochY = [np.arange(begins[i], ends[i]) + 1 for i in range(len(ends))]
+  
+  for i, pred in enumerate(source_pred):
+	  axs[0][1].plot(epochY[i], pred, label='model {}'.format(i))
+	  axs[0][1].set_title('Source Domain Prediction')
+	  axs[0][1].set_ylabel('accuracy')
+	  axs[0][1].set_xlabel('epoch')
+	  axs[0][1].legend(frameon=True, facecolor='white')
 
-    axs[1][1].plot(np.arange(len(train_history['avg_dot'])), 
-                train_history['avg_dot'], label='trainer {}'.format(trainer_num+1))
-    axs[1][1].set_title('Avg of dot product over batches')
-    axs[1][1].set_ylabel('avg of dot')
-    axs[1][1].set_xlabel('batch')
-    axs[1][1].legend(frameon=True, facecolor='white')
+  target_pred_lens = np.array([len(pred) for pred in domain_model_c])
+  ends = np.cumsum(target_pred_lens)
+  begins = ends - target_pred_lens
+  epochY = [np.arange(begins[i], ends[i]) + 1 for i in range(len(ends))]
+  
+  for i, pred in enumerate(domain_model_c):
+	  axs[1][0].plot(epochY[i], pred, label='model {}'.format(i))
+	  axs[1][0].set_title("Domain Prediction on Class Predictor's Layer")
+	  axs[1][0].set_ylabel('accuracy')
+	  axs[1][0].set_xlabel('epoch')
+	  axs[1][0].legend(frameon=True, facecolor='white')
+
+  target_pred_lens = np.array([len(pred) for pred in domain_model_f])
+  ends = np.cumsum(target_pred_lens)
+  begins = ends - target_pred_lens
+  epochY = [np.arange(begins[i], ends[i]) + 1 for i in range(len(ends))]
+  
+  for i, pred in enumerate(domain_model_f):
+	  axs[1][1].plot(epochY[i], pred, label='model {}'.format(i))
+	  axs[1][1].set_title("Domain Prediction on Feature Extractor")
+	  axs[1][1].set_ylabel('accuracy')
+	  axs[1][1].set_xlabel('epoch')
+	  axs[1][1].legend(frameon=True, facecolor='white')
