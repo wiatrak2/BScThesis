@@ -136,7 +136,10 @@ class Trainer:
 			
 			for data, target in merged_test_loader:
 				data = data.to(self.device)
-				_, domains = target
+				if merged_test_loader.dataset.get_labels:
+					_, domains = target
+				else:
+					domains = target
 				domains = domains.to(self.device)
 				
 				domain_out = domain_model(data)

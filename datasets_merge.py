@@ -2,11 +2,12 @@ import torch
 import numpy as np
 
 class Merge_Datasets(torch.utils.data.Dataset):
-  def __init__(self, datasets):
+  def __init__(self, datasets, get_labels=True):
     self.datasets = datasets
     self.lengths = [len(ds) for ds in datasets]
     self.offsets = np.cumsum(self.lengths)
     self.len = np.sum(self.lengths)
+	self.get_labels = get_labels
     
   def __len__(self):
     return self.len
@@ -17,4 +18,6 @@ class Merge_Datasets(torch.utils.data.Dataset):
         index -= np.append([0], self.offsets)[dset_num]
         sample, label = self.datasets[dset_num][index]
         domain = torch.tensor(dset_num)
-        return (sample, (label, domain))
+		if self.get_labels:
+			domain = label, domain
+        return sample, domain

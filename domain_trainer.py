@@ -56,7 +56,10 @@ class DomainTrainer:
 		with torch.no_grad():    
 			for data, target in merged_test_loader:
 				data = data.to(device)
-				_, domains = target
+				if merged_test_loader.dataset.get_labels:
+					_, domains = target
+				else:
+					domains - target
 				domains = domains.to(device)
 					
 				domain_out = model(data)
