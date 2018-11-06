@@ -14,10 +14,10 @@ class Merge_Datasets(torch.utils.data.Dataset):
 	
 	def __getitem__(self, index):
 		for dset_num, dset_offset in enumerate(self.offsets):
-		if index < dset_offset:
-			index -= np.append([0], self.offsets)[dset_num]
-			sample, label = self.datasets[dset_num][index]
-			domain = torch.tensor(dset_num)
-			if self.get_labels:
-				domain = label, domain
-			return sample, domain
+			if index < dset_offset:
+				index -= np.append([0], self.offsets)[dset_num]
+				sample, label = self.datasets[dset_num][index]
+				domain = torch.tensor(dset_num)
+				if self.get_labels:
+					domain = label, domain
+				return sample, domain
