@@ -27,7 +27,9 @@ class Trainer:
 	@staticmethod
 	def concat_domain_batches(batches, shuffle=True):
 		domain_num = np.arange(len(batches))[...,None]
-		batch_len = len(batches[0])
+		min_batch_size = min([len(batch) for batch in batches])
+		batches = [batch[:min_batch_size] for batch in batches]
+		batch_len = min_batch_size
 		try:
 			batches = torch.cat(batches).numpy()
 		except:
