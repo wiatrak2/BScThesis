@@ -84,7 +84,10 @@ class Trainer:
 			optim_c.step()
 			optim_d.step()
 			if self.train_domain:
-				data_snd, _ = domain_iter.next()
+				try:
+					data_snd, _ = domain_iter.next()
+				except StopIteration:
+					break
 				domainData, domains = self.concat_domain_batches([data.to('cpu'), data_snd.to('cpu')])
 				domainData, domains = domainData.to(self.device), domains.to(self.device)
 				optim_f.zero_grad()

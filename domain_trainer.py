@@ -27,7 +27,9 @@ class DomainTrainer:
 			model_c = gr_models.model_c
 			model_gr = gr_models.model_d
 
-		for batch_idx, (data, (_, domains)) in enumerate(train_loader):
+		for batch_idx, (data, domains) in enumerate(train_loader):
+			if  train_loader.dataset.get_labels:
+				_, domains = domains
 			data, domains = data.to(self.device), domains.to(self.device)
 			optimizer.zero_grad()
 			output = model_d(model_f(data))
@@ -35,9 +37,9 @@ class DomainTrainer:
 			loss.backward()
 			optimizer.step()
 			if self.history and gr_models:
-				model_c_mtx = model_c.fc1.weight.cpu().detach().numpy()
-				model_d_mtx = model_d.fc1.weight.cpu().detach().numpy()
-				model_gr_mtx = model_gr.fc1.weight.cpu().detach().numpy()
+				model_c_mtx = model_c.get_mtx().weight.cpu().detach().numpy()
+				model_d_mtx = model_d.get_mtx().weight.cpu().detach().numpy()
+				model_gr_mtx = model_gr.get_mtx().weight.cpu().detach().numpy()
 				train_history['avg_len'].append(np.mean(np.diag(model_d_mtx.dot(model_d_mtx.T))))
 				train_history['avg_dot'].append(np.mean(model_d_mtx.dot(model_c_mtx.T)))
 				train_history['avg_dot_gr'].append(np.mean(model_d_mtx.dot(model_gr_mtx.T)))
@@ -59,7 +61,7 @@ class DomainTrainer:
 				if merged_test_loader.dataset.get_labels:
 					_, domains = target
 				else:
-					domains - target
+					domains = target
 				domains = domains.to(device)
 					
 				domain_out = model(data)
