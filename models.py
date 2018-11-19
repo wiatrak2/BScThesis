@@ -17,63 +17,67 @@ def grad_reverse(x, lambd):
     return GradReverse(lambd)(x)
 
 class MnistFeatureExtractor(nn.Module):
-	def __init__(self):
+	def __init__(self, activation=F.leaky_relu):
 		super(MnistFeatureExtractor, self).__init__()
 		self.conv1 = nn.Conv2d(3, 10, kernel_size=5)
 		self.conv2 = nn.Conv2d(10, 20, kernel_size=5)
 		self.conv2_drop = nn.Dropout2d()
+		self.activation = activation
 
 	def get_mtx(self):
 		return None
 
 	def forward(self, x):
-		x = F.leaky_relu(F.max_pool2d(self.conv1(x), 2))
-		x = F.leaky_relu(F.max_pool2d(self.conv2_drop(self.conv2(x)), 2))
+		x = self.activation(F.max_pool2d(self.conv1(x), 2))
+		x = self.activation(F.max_pool2d(self.conv2_drop(self.conv2(x)), 2))
 		return x.view(x.size(0), -1)
 
 
 class MnistClassPredictor(nn.Module):
-	def __init__(self, input_size=320, inner_size=100):
+	def __init__(self, input_size=320, inner_size=100, activation=F.leaky_relu):
 		super(MnistClassPredictor, self).__init__()
 		self.fc1 = nn.Linear(input_size, inner_size)
 		self.fc2 = nn.Linear(inner_size, 10)
+		self.activation = activation
 
 	def get_mtx(self):
 		return self.fc1
 
 	def forward(self, x):
-		x = F.leaky_relu(self.fc1(x))
+		x = self.activation(self.fc1(x))
 		x = F.dropout(x, training=self.training)
 		x = self.fc2(x)
 		return F.log_softmax(x, dim=1)
 
 class MnistDomain(nn.Module):
-	def __init__(self, input_size=320, inner_size=100):
+	def __init__(self, input_size=320, inner_size=100, activation=F.leaky_relu):
 		super(MnistDomain, self).__init__()
 		self.fc1 = nn.Linear(input_size, inner_size)
 		self.fc2 = nn.Linear(inner_size, 2)
+		self.activation = activation
 
 	def get_mtx(self):
 		return self.fc1
 
 	def forward(self, x, lambd=1.):
 		x = grad_reverse(x, lambd)
-		x = F.leaky_relu(self.fc1(x))
+		x = self.activation(self.fc1(x))
 		x = F.dropout(x, training=self.training)
 		x = self.fc2(x)
 		return F.log_softmax(x, dim=1)
 
 class DomainPredictor(nn.Module):
-	def __init__(self, input_size=320, inner_size=100):
+	def __init__(self, input_size=320, inner_size=100, activation=F.leaky_relu):
 		super(DomainPredictor, self).__init__()
 		self.fc1 = nn.Linear(input_size, inner_size)
 		self.fc2 = nn.Linear(inner_size, 2)
+		self.activation = activation
 
 	def get_mtx(self):
 		return self.fc1
 
 	def forward(self, x, *args):
-		x = F.leaky_relu(self.fc1(x))
+		x = self.activation(self.fc1(x))
 		x = F.dropout(x, training=self.training)
 		x = self.fc2(x)
 		return F.log_softmax(x, dim=1)
