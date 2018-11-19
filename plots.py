@@ -157,3 +157,37 @@ def plot_domain_vanishing(trainers, test_histories, domain_histories, domain_gr_
 	  axs[1][1].set_ylabel('accuracy')
 	  axs[1][1].set_xlabel('epoch')
 	  axs[1][1].legend(frameon=True, facecolor='white')
+
+def plot_conceptors(conceptors_i, conceptors_j, apertures, quota, or_f, and_f, diff_f):
+  fig, axs = plt.subplots(2, 2, figsize=(21,10))
+
+  fig.suptitle('Conceptors')
+
+  axs[0][0].plot(apertures, list(map(lambda x:quota(x), conceptors_i)), label='Quota of 1st Conceptor')
+  axs[0][0].plot(apertures, list(map(lambda x:quota(x), conceptors_j)), label='Quota of 2nd Conceptor')
+  axs[0][0].set_title('Conceptors quota')
+  axs[0][0].set_ylabel('Quota')
+  axs[0][0].set_xlabel('Aperture')
+  axs[0][0].legend(frameon=True, facecolor='white')
+  
+  or_conceptors = [or_f(c1,c2,a) for (c1,c2,a) in list(zip(conceptors_i, conceptors_j, apertures))]
+  axs[0][1].plot(apertures, list(map(lambda x:quota(x), or_conceptors)), label='Quota of C1 v C2')
+  axs[0][1].set_title('Quota of C1 OR C2')
+  axs[0][1].set_ylabel('Quota')
+  axs[0][1].set_xlabel('Aperture')
+  axs[0][1].legend(frameon=True, facecolor='white')
+
+  
+  and_conceptors = [and_f(c1,c2,a) for (c1,c2,a) in list(zip(conceptors_i, conceptors_j, apertures))]
+  axs[1][0].plot(apertures, list(map(lambda x:quota(x), and_conceptors)), label='Quota of C1 ^ C2')
+  axs[1][0].set_title('Quota of C1 AND C2')
+  axs[1][0].set_ylabel('Quota')
+  axs[1][0].set_xlabel('Aperture')
+  axs[1][0].legend(frameon=True, facecolor='white')
+
+  diff_conceptors = [diff_f(c1,c2,a) for (c1,c2,a) in list(zip(conceptors_i, conceptors_j, apertures))]
+  axs[1][1].plot(apertures, list(map(lambda x:quota(x), diff_conceptors)), label='Quota of C1\C2')
+  axs[1][1].set_title('Quota of C1\C2')
+  axs[1][1].set_ylabel('Quota')
+  axs[1][1].set_xlabel('Aperture')
+  axs[1][1].legend(frameon=True, facecolor='white')
