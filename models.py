@@ -66,6 +66,19 @@ class MnistDomain(nn.Module):
 		x = self.fc2(x)
 		return F.log_softmax(x, dim=1)
 
+class ConceptorModel(nn.Module):
+	def __init__(self, model_f, C, device):
+		super(ConceptorModel, self).__init__()
+		self.model_f = model_f
+		self.C = torch.from_numpy(C).float().to(device)
+		for param in self.model_f.parameters():
+			param.requires_grad = False
+	def get_mtx(self):
+		return self.C
+	def forward(self, x, *args):
+		x = self.model_f(x)
+		return torch.t(torch.mm(self.C, torch.t(x)))
+
 class DomainPredictor(nn.Module):
 	def __init__(self, input_size=320, inner_size=100, activation=F.leaky_relu):
 		super(DomainPredictor, self).__init__()
