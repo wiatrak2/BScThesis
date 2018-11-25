@@ -111,12 +111,13 @@ class CutHalf(nn.Module):
 		return self.output_model(x)
 
 class LinearFromList(nn.Module):
-	def __init__(self, size_list, use_gr=False, output_model=None):
+	def __init__(self, size_list, activation=F.leaky_relu, use_gr=False, output_model=None):
 		super(LinearFromList, self).__init__()
 		self.size_list = size_list
 		self.linears = nn.ModuleList([nn.Linear(size_list[i], size_list[i+1]) for i in range(len(size_list)-1)])
 		self.output_model = output_model
 		self.use_gr = use_gr
+		self.activation = activation
 
 	def get_mtx(self):
 		return self.linears[0] if len(self.linears) > 0 else self.output_model.get_mtx()
@@ -132,7 +133,7 @@ class LinearFromList(nn.Module):
 		if self.use_gr:
 			x = grad_reverse(x, lambd)
 		for layer in self.linears:
-			x = F.leaky_relu(layer(x))
+			x = self.activation(layer(x))
 			x = F.dropout(x, training=self.training)
 		if self.output_model is not None:
 			return self.output_model(x)
