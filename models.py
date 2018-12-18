@@ -16,6 +16,19 @@ class GradReverse(torch.autograd.Function):
 def grad_reverse(x, lambd):
     return GradReverse(lambd)(x)
 
+class GradientReversalInversion(torch.autograd.Function):
+    def __init__(self, lambd=1.):
+      self.lambd = lambd
+    
+    def forward(self, x):
+        return x.view_as(x)
+
+    def backward(self, grad_output):
+        return  -self.lambd	/ grad_output
+
+def GRI(x, lambd):
+	return GradientReversalInversion(lambd)(x)
+
 class MnistFeatureExtractor(nn.Module):
 	def __init__(self, activation=F.leaky_relu):
 		super(MnistFeatureExtractor, self).__init__()
@@ -150,6 +163,27 @@ class SequentialModel(nn.Sequential):
 		for module in self._modules.values():
 			input = module(input, *args)
 		return input
+
+class MnistClassifier3D(nn.Module):
+	def __init__(self, input_size=320, inner_size=100, activation=F.leaky_relu):
+		super(MnistClassifier3D, self).__init__()
+		self.fc1 = nn.Linear(input_size, 3)
+		self.fc2 = nn.Linear(3, inner_size)
+		self.fc3 = nn.Linear(inner_size, 10)
+		self.activation = activation
+
+	def get_mtx(self):
+		return self.fc1
+
+	def get_3D(self, x):
+		return self.activation(self.fc1(x))
+
+	def forward(self, x):
+		x = self.activation(self.fc1(x))
+		x = self.activation(self.fc2(x))
+		x = F.dropout(x, training=self.training)
+		x = self.fc3(x)
+		return F.log_softmax(x, dim=1)
 
 def extend_feature_extractor(model_f, model_continuation, freeze_model=True, return_size=True):
 	if freeze_model:
