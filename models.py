@@ -175,8 +175,10 @@ class MnistClassifier3D(nn.Module):
 	def get_mtx(self):
 		return self.fc1
 
-	def get_3D(self, x):
-		return self.activation(self.fc1(x))
+	def get_3D(self, x, activation=True):
+		if activation:
+			return self.activation(self.fc1(x))
+		return self.fc1(x)
 
 	def forward(self, x):
 		x = self.activation(self.fc1(x))
