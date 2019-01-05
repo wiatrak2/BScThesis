@@ -63,17 +63,18 @@ class MnistClassPredictor(nn.Module):
 		return F.log_softmax(x, dim=1)
 
 class MnistDomain(nn.Module):
-	def __init__(self, input_size=320, inner_size=100, activation=F.leaky_relu):
+	def __init__(self, input_size=320, inner_size=100, grad_func=grad_reverse, activation=F.leaky_relu):
 		super(MnistDomain, self).__init__()
 		self.fc1 = nn.Linear(input_size, inner_size)
 		self.fc2 = nn.Linear(inner_size, 2)
+		self.grad_func = grad_func
 		self.activation = activation
 
 	def get_mtx(self):
 		return self.fc1
 
 	def forward(self, x, lambd=1.):
-		x = grad_reverse(x, lambd)
+		x = self.grad_func(x, lambd)
 		x = self.activation(self.fc1(x))
 		x = F.dropout(x, training=self.training)
 		x = self.fc2(x)
