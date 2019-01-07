@@ -16,19 +16,6 @@ class GradReverse(torch.autograd.Function):
 def grad_reverse(x, lambd):
     return GradReverse(lambd)(x)
 
-class GradientReversalInversion(torch.autograd.Function):
-    def __init__(self, lambd=1.):
-      self.lambd = lambd
-    
-    def forward(self, x):
-        return x.view_as(x)
-
-    def backward(self, grad_output):
-        return  -self.lambd	/ grad_output
-
-def GRI(x, lambd):
-	return GradientReversalInversion(lambd)(x)
-
 class MnistFeatureExtractor(nn.Module):
 	def __init__(self, activation=F.leaky_relu):
 		super(MnistFeatureExtractor, self).__init__()
@@ -108,6 +95,30 @@ class DomainPredictor(nn.Module):
 		x = F.dropout(x, training=self.training)
 		x = self.fc2(x)
 		return F.log_softmax(x, dim=1)
+
+class SingleLayerModel(nn.Module):
+	def __init__(self, input_size=320, output_size=2, softmax=False, dropout=False, grad_func=None, activation=None):
+		super(SingleLayerModel, self).__init__()
+		self.fc = nn.Linear(input_size, output_size)
+		self.softmax = softmax
+		self.dropout = dropout
+		self.grad_func = grad_func
+		self.activation = activation
+
+	def get_mtx(self):
+		return self.fc
+
+	def forward(self, x, lambd=1.):
+		if self.grad_func is not None:
+			x = self.grad_func(x, lambd)
+		x = self.fc(x)
+		if self.activation is not None:
+			x = self.activation(x)
+		if self.dropout:
+			x = F.dropout(x, training=self.training)
+		if self.softmax:
+			return F.log_softmax(x, dim=1)	
+		return x
 
 class CutHalf(nn.Module):
 	def __init__(self, output_model, half=0):
