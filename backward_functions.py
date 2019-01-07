@@ -1,3 +1,8 @@
+import numpy as np
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
 class GRLog(torch.autograd.Function):
 	def __init__(self, lambd=1., grad_log=None):
 		self.lambd = lambd
