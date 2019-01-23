@@ -114,7 +114,7 @@ class Trainer:
 				model_c_mtx = model_c.get_mtx().weight.cpu().detach().numpy()
 				self.train_history['avg_len_c'].append(np.mean(np.diag(model_c_mtx.dot(model_c_mtx.T))))
 				self.train_history['avg_len_d'].append(np.mean(np.diag(model_d_mtx.dot(model_d_mtx.T))))
-				self.train_history['avg_dot'].append(np.mean(model_c_mtx.dot(model_d_mtx.T)))  
+				self.train_history['avg_dot'].append(np.mean(np.power(model_c_mtx.dot(model_d_mtx.T), 2)))  
 			if batch_idx % self.log_interval == 0 and self.print_logs:
 				print('Train Epoch: \
 					{} [{}/{} ({:.0f}%)]\tLoss: {:.6f}, lr: {:.5f} lambd: {:.5f}'

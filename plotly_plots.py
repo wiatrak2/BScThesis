@@ -76,7 +76,7 @@ def plot_multimodel_stats(trainers, test_histories):
 
 	init_notebook_mode(connected=False)
 
-	fig['layout'].update(height=800, width=1200, title='Models Test History')
+	fig['layout'].update(height=800, width=1200)
 	plotly.offline.iplot(fig, filename='basic-line')
 
 def plot_domain_vanishing(trainers, test_histories, domain_histories, domain_gr_histories):
@@ -123,5 +123,5 @@ def plot_domain_vanishing(trainers, test_histories, domain_histories, domain_gr_
 
 	init_notebook_mode(connected=False)
 
-	fig['layout'].update(height=800, width=1200, title='Models Test History')
+	fig['layout'].update(height=800, width=1200)
 	plotly.offline.iplot(fig, filename='basic-line')
