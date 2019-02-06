@@ -15,18 +15,45 @@ class GRLog(torch.autograd.Function):
 		if self.grad_log is not None:
 			self.grad_log.append(grad_output)
 		return grad_output * -self.lambd
-  
-class GRandMult(torch.autograd.Function):
-	def __init__(self, alpha=1., lambd=1., grad_log=None):
+
+class GRandAdd(torch.autograd.Function):
+	def __init__(self, lambd=1., grad_log=None):
 		self.lambd = lambd
-		self.alpha = alpha
 		self.grad_log = grad_log
 	
 	def forward(self, x):
 		return x
 	
 	def backward(self, grad_output):
-		new_grad = grad_output * torch.rand_like(grad_output) * self.alpha * self.lambd
+		new_grad = grad_output + torch.rand_like(grad_output) * torch.mean(grad_output)
+		if self.grad_log is not None:
+			self.grad_log.append(new_grad)
+		return new_grad  
+
+class GRandMult(torch.autograd.Function):
+	def __init__(self, lambd=1., grad_log=None):
+		self.lambd = lambd
+		self.grad_log = grad_log
+	
+	def forward(self, x):
+		return x
+	
+	def backward(self, grad_output):
+		new_grad = grad_output * (torch.rand_like(grad_output) - 1) * 2
+		if self.grad_log is not None:
+			self.grad_log.append(new_grad)
+		return new_grad
+
+class GRandSign(torch.autograd.Function):
+	def __init__(self, lambd=1., grad_log=None):
+		self.lambd = lambd
+		self.grad_log = grad_log
+	
+	def forward(self, x):
+		return x
+	
+	def backward(self, grad_output):
+		new_grad = grad_output * torch.sign(torch.rand_like(grad_output) - 1) * self.lambd
 		if self.grad_log is not None:
 			self.grad_log.append(new_grad)
 		return new_grad
@@ -41,7 +68,7 @@ class GRand(torch.autograd.Function):
 		return x
 	
 	def backward(self, grad_output):
-		new_grad = torch.rand_like(grad_output) * self.alpha * self.lambd
+		new_grad = (torch.rand_like(grad_output) - 1) * self.alpha * self.lambd
 		if self.grad_log is not None:
 			self.grad_log.append(new_grad)
 		return new_grad
